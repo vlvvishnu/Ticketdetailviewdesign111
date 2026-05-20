@@ -166,6 +166,7 @@ export function DatadogValidationContent({
   isCompleted = false
 }: DatadogValidationContentProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [openedFromBanner, setOpenedFromBanner] = useState(false);
   const [records, setRecords] = useSubtaskData<DatadogRecord[]>(subtaskId, []);
 
   const handleAddRecords = (selectedRecords: DatadogRecord[]) => {
@@ -236,12 +237,12 @@ export function DatadogValidationContent({
                   { label: 'Workflow', value: 'Eligibility Verification' },
                   { label: 'Variant', value: 'Homehealth' }
                 ]}
-                onClick={() => !isCompleted && setIsModalOpen(true)}
+                onClick={() => !isCompleted && (setOpenedFromBanner(true), setIsModalOpen(true))}
               />
 
               {/* Dropbox Button */}
               <button
-                onClick={() => !isCompleted && setIsModalOpen(true)}
+                onClick={() => !isCompleted && (setOpenedFromBanner(false), setIsModalOpen(true))}
                 disabled={isCompleted}
                 className={`w-full h-[132px] border-dashed rounded-[3px] transition-all flex items-center justify-center ${
                   isCompleted
@@ -271,13 +272,13 @@ export function DatadogValidationContent({
       {isModalOpen && !isCompleted && (
         <DatadogValidationModal
           isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          onClose={() => { setIsModalOpen(false); setOpenedFromBanner(false); }}
           onAdd={handleAddRecords}
           availableRecords={sampleRecords}
           existingRecords={records}
-          prefilledTenant="Brightstar Care"
-          prefilledWorkflow="Eligibility Verification"
-          prefilledVariant="Homehealth"
+          prefilledTenant={openedFromBanner ? 'Brightstar Care' : undefined}
+          prefilledWorkflow={openedFromBanner ? 'Eligibility Verification' : undefined}
+          prefilledVariant={openedFromBanner ? 'Homehealth' : undefined}
         />
       )}
     </>
