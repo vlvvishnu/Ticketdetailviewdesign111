@@ -320,6 +320,7 @@ export function TicketView2ListingPage({ onFDTicketClick, onNavigate }: TicketVi
                   return (
                     <div key={group.fdId} className="mb-[18px] rounded-[14px] border border-[#DCE5F2] overflow-visible bg-transparent shadow-none">
                       {/* FD Group Header */}
+                      <div className="rounded-[14px] overflow-hidden bg-[#F4F7FD]">
                       <div
                         className="h-[52px] rounded-t-[14px] flex items-center gap-2 px-[22px] border-b border-[#E2E8F0] bg-[#F4F7FD] hover:bg-[#EBF0FB] cursor-pointer select-none transition-colors"
                         onClick={() => toggleGroup(group.fdId)}
@@ -454,6 +455,7 @@ export function TicketView2ListingPage({ onFDTicketClick, onNavigate }: TicketVi
                           </div>
                         </div>
                       ))}
+                      </div>
                     </div>
                   );
                 })
