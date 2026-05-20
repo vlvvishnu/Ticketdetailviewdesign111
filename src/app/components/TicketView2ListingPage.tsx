@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ExternalLink, ChevronDown, ChevronRight, Filter, Inbox, Search } from 'lucide-react';
+import { ExternalLink, Filter, Inbox, Search } from 'lucide-react';
 import { LeftSidebar } from './LeftSidebar';
 import svgPaths from '@/imports/Frame1410084320/svg-gty1oqsfxl';
 
@@ -31,8 +31,8 @@ interface TicketView2ListingPageProps {
 
 function HeaderIcon() {
   return (
-    <div className="absolute left-[10px] size-[23.993px] top-[14px]" data-name="Icon">
-      <svg className="absolute block inset-0 size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 23.9931 23.9931">
+    <div className="w-full h-full flex items-center justify-center" data-name="Icon">
+      <svg className="block w-6 h-6" fill="none" preserveAspectRatio="xMidYMid meet" viewBox="0 0 23.9931 23.9931">
         <g id="Icon">
           <path d={svgPaths.p29f2d300} id="Vector" stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.99943" />
           <path d="M12.9963 4.99856V6.99856" id="Vector_2" stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.99943" />
@@ -317,20 +317,20 @@ export function TicketView2ListingPage({ onFDTicketClick, onNavigate }: TicketVi
                 filteredGroups.map(group => {
                   const isCollapsed = collapsedGroups.has(group.fdId);
                   const statusCounts = getGroupStatusCounts(group.areTickets);
-                  const statusLabel = group.fdStatus;
-
                   return (
-                    <div key={group.fdId} className="mb-[18px] rounded-[14px] border border-[#DCE5F2] overflow-hidden bg-[#F4F7FD] shadow-none">
+                    <div key={group.fdId} className="mb-[18px] rounded-[14px] border border-[#DCE5F2] overflow-visible bg-[#F4F7FD] shadow-none">
                       {/* FD Group Header */}
                       <div
                         className="h-[52px] flex items-center gap-2 px-[22px] border-b border-[#E2E8F0] bg-[#F4F7FD] hover:bg-[#EBF0FB] cursor-pointer select-none transition-colors"
                         onClick={() => toggleGroup(group.fdId)}
                       >
-                        {/* Caret — right when collapsed, down when expanded */}
-                        {isCollapsed
-                          ? <ChevronRight className="w-4 h-4 text-[#4B6094] flex-shrink-0" />
-                          : <ChevronDown className="w-4 h-4 text-[#4B6094] flex-shrink-0" />
-                        }
+                        {/* Filled caret — right when collapsed, down when expanded */}
+                        <span
+                          className={`inline-block flex-shrink-0 transition-transform duration-150 ${isCollapsed ? '' : 'rotate-90'}`}
+                          aria-hidden="true"
+                        >
+                          <span className="block w-0 h-0 border-y-[5px] border-y-transparent border-l-[7px] border-l-[#3553B7]" />
+                        </span>
 
                         {/* FD Ticket ID */}
                         <span className="text-[14px] font-bold text-[#1E293B] flex-shrink-0">
@@ -346,16 +346,13 @@ export function TicketView2ListingPage({ onFDTicketClick, onNavigate }: TicketVi
                           <ExternalLink className="w-3.5 h-3.5 text-[#64748B] hover:text-blue-600" />
                         </button>
 
-                        {/* Vertical divider */}
-                        <div className="w-px h-4 bg-[#CBD5E1] mx-1 flex-shrink-0" />
-
                         {/* ARE ticket count badge */}
-                        <span className="inline-flex items-center h-6 px-2.5 rounded-full text-xs font-semibold flex-shrink-0 bg-[#DCEBFF] text-[#326BFF]">
+                        <span className="inline-flex items-center justify-center h-6 w-[122px] rounded-full text-[13px] font-medium flex-shrink-0 bg-[#D9E4F3] text-[#35557A]">
                           {formatCountLabel(group.areTickets.length, 'ARE ticket', 'ARE tickets')}
                         </span>
 
-                        {/* Status dots — pushed to the right */}
-                        <div className="flex items-center gap-4 ml-auto">
+                        {/* Status summary right next to ticket count */}
+                        <div className="flex items-center gap-3 flex-wrap">
                           {statusOrder.filter(status => statusCounts[status]).map(status => (
                             <div key={status} className="flex items-center gap-1.5">
                               <div className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[status] || 'bg-gray-400'}`} />
@@ -369,7 +366,7 @@ export function TicketView2ListingPage({ onFDTicketClick, onNavigate }: TicketVi
                       {!isCollapsed && group.areTickets.map(ticket => (
                         <div
                           key={ticket.areId}
-                          className="grid gap-3 px-[22px] h-[74px] border-b border-[#EEF2F6] bg-white cursor-pointer transition-colors hover:bg-[#F8FAFF] group"
+                          className="grid gap-3 px-[22px] h-[74px] border-b border-[#EEF2F6] bg-white cursor-pointer transition-colors hover:bg-[#F8FAFF] group overflow-visible"
                           style={{ gridTemplateColumns: '160px 320px 140px 120px 120px 180px 100px 120px 160px 240px' }}
                           onClick={() => onFDTicketClick(group.fdId, ticket.areId)}
                           onMouseEnter={() => setHoveredRow(ticket.areId)}
@@ -417,7 +414,7 @@ export function TicketView2ListingPage({ onFDTicketClick, onNavigate }: TicketVi
                             </div>
                             {/* Hover tooltip */}
                             {hoveredRow === ticket.areId && (
-                              <div className="absolute z-30 left-0 top-full mt-1 w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg pointer-events-none">
+                              <div className="absolute z-40 left-0 bottom-full mb-1 w-64 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg pointer-events-none">
                                 <div className="font-semibold mb-2">Clients ({ticket.tenants.length}):</div>
                                 <ul className="mb-3 space-y-0.5">
                                   {ticket.tenants.map((t, i) => <li key={i}>• {t}</li>)}

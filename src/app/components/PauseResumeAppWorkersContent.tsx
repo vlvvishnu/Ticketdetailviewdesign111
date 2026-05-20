@@ -23,6 +23,7 @@ export function PauseResumeAppWorkersContent({
   isCompleted = false
 }: PauseResumeAppWorkersContentProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [openedFromBanner, setOpenedFromBanner] = useState(false);
   // Use persisted data for this specific subtask instance
   const [addedWorkers, setAddedWorkers] = useSubtaskData<AppWorkerRow[]>(subtaskId, []);
 
@@ -119,12 +120,12 @@ export function PauseResumeAppWorkersContent({
                 { label: 'Workflow', value: 'Eligibility Verification' },
                 { label: 'Variant', value: 'Homehealth' }
               ]}
-              onClick={() => !isCompleted && setIsModalOpen(true)}
+              onClick={() => !isCompleted && (setOpenedFromBanner(true), setIsModalOpen(true))}
             />
 
             {/* Dropbox Button */}
             <button
-              onClick={() => !isCompleted && setIsModalOpen(true)}
+              onClick={() => !isCompleted && (setOpenedFromBanner(false), setIsModalOpen(true))}
               disabled={isCompleted}
               className={`w-full h-[132px] border-dashed rounded-[3px] transition-all flex items-center justify-center ${
                 isCompleted
@@ -152,11 +153,11 @@ export function PauseResumeAppWorkersContent({
       {/* Modal */}
       <PauseResumeAppWorkersModal
         isOpen={isModalOpen && !isCompleted}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => { setIsModalOpen(false); setOpenedFromBanner(false); }}
         onConfirm={handleAddWorkers}
-        prefilledTenant="Brightstar Care"
-        prefilledWorkflow="Eligibility Verification"
-        prefilledVariant="Homehealth"
+        prefilledTenant={openedFromBanner ? 'Brightstar Care' : undefined}
+        prefilledWorkflow={openedFromBanner ? 'Eligibility Verification' : undefined}
+        prefilledVariant={openedFromBanner ? 'Homehealth' : undefined}
       />
     </div>
   );
