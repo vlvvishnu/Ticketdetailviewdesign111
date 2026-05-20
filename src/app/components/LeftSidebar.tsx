@@ -37,7 +37,7 @@ export function LeftSidebar({ activeView = 'home', onNavigate, onResetTicket }: 
   const menuItems = [
     { id: 'home', label: 'HOME', icon: Home },
     { id: 'tickets', label: 'Tickets', icon: Ticket },
-    { id: 'ticket-view-2', label: 'Ticket\nView 2', icon: Layers },
+    { id: 'ticket-view-2', label: 'Ticket\nView – P1', icon: Layers },
     { id: 'version', label: 'Version\nVisibility', icon: Eye },
     { id: 'workers', label: 'Scale\nworkers', icon: Users },
   ];
