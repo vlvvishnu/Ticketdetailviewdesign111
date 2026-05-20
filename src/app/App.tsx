@@ -139,6 +139,25 @@ export default function App() {
     }
   ];
 
+
+  const initializeV2TicketState = (fdId: string, preferredAreticketId?: string) => {
+    const fdTicket = v2FDTickets.find(t => t.fdId === fdId);
+    if (!fdTicket) return;
+
+    const firstId = preferredAreticketId || fdTicket.areTickets[0]?.id || '';
+    const newMap: Record<string, ActivityEvent[]> = {};
+    fdTicket.areTickets.forEach(ticket => {
+      newMap[ticket.id] = [makeCreatedEvent(ticket.id)];
+    });
+
+    setV2ActivitiesMap(newMap);
+    setSubtasks(fdTicket.areTickets);
+    setActiveSubtask(firstId);
+    setActivityEvents(newMap[firstId] ?? []);
+    setSubtaskCounter({});
+    setCurrentTicketContext(fdId);
+  };
+
   // Hardcoded anomaly subtask for T105 — always present, never editable
   const anomalySubtask: import('@/app/components/SubtaskTabs').Subtask = {
     id: 'anomaly-detected',
@@ -684,13 +703,6 @@ export default function App() {
     if (!currentTicketId || currentView !== 'detail') return;
 
     const loadTicketState = async () => {
-      if (currentTicketId.startsWith('FD-')) {
-        // V2 FD tickets use hardcoded data — no backend load needed
-        isLoadingTicket.current = false;
-        setIsLoadingTicketState(false);
-        return;
-      }
-
       isLoadingTicket.current = true;
       setIsLoadingTicketState(true);
 
@@ -719,6 +731,10 @@ export default function App() {
           setActiveSubtask(restoredActiveSubtask);
           setSubtaskCounter(savedState.subtaskCounter);
 
+          if (currentTicketId.startsWith('FD-') && savedState.v2ActivitiesMap) {
+            setV2ActivitiesMap(savedState.v2ActivitiesMap);
+          }
+
           // Restore subtask data (table contents, etc.)
           if (savedState.subtaskData) {
             restoreTicketSubtaskData(currentTicketId, savedState.subtaskData);
@@ -729,20 +745,24 @@ export default function App() {
         } else {
           // No saved state - initialize with defaults
           console.log(`No saved state for ${currentTicketId}, starting fresh`);
-          
-          // Reset to empty state for new tickets
-          setSubtasks([]);
-          setActivityEvents([
-            {
-              id: 1,
-              timestamp: '10/13/2025 10:53PM',
-              action: 'created ticket',
-              user: 'System',
-              type: 'system'
-            }
-          ]);
-          setActiveSubtask('');
-          setSubtaskCounter({});
+
+          if (currentTicketId.startsWith('FD-')) {
+            initializeV2TicketState(currentTicketId);
+          } else {
+            // Reset to empty state for new V1 tickets
+            setSubtasks([]);
+            setActivityEvents([
+              {
+                id: 1,
+                timestamp: '10/13/2025 10:53PM',
+                action: 'created ticket',
+                user: 'System',
+                type: 'system'
+              }
+            ]);
+            setActiveSubtask('');
+            setSubtaskCounter({});
+          }
         }
       } catch (error) {
         console.error('Error loading ticket state:', error);
@@ -780,6 +800,7 @@ export default function App() {
         activeSubtask,
         subtaskCounter,
         subtaskData, // Include all subtask table data
+        v2ActivitiesMap: currentTicketId.startsWith('FD-') ? v2ActivitiesMap : undefined,
         timestamp: new Date().toISOString()
       };
 
@@ -798,7 +819,7 @@ export default function App() {
         clearTimeout(saveTimerRef.current);
       }
     };
-  }, [subtasks, activityEvents, activeSubtask, subtaskCounter, currentTicketId, currentView]);
+  }, [subtasks, activityEvents, activeSubtask, subtaskCounter, currentTicketId, currentView, v2ActivitiesMap]);
 
   // Handle context banner click — adds suggested subtask and opens modal pre-filled in post-search state
   const handleContextBannerClick = () => {
@@ -821,9 +842,11 @@ export default function App() {
       const success = await resetTicket(currentTicketId);
       
       if (success) {
-        // Clear all subtask data from global store
-        clearAllSubtaskData();
-        
+        // Clear all subtask data from global store for v1 only
+        if (!currentTicketId.startsWith('FD-')) {
+          clearAllSubtaskData();
+        }
+
         // Clear local state
         setSubtasks([]);
         setActivityEvents([
@@ -837,11 +860,14 @@ export default function App() {
         ]);
         setActiveSubtask('');
         setSubtaskCounter({});
+        setV2ActivitiesMap({});
         setExpandedActivity(null);
         setActivePanel(null);
 
-        // T105: restore hardcoded anomaly subtask after reset
-        if (currentTicketId === 'ARE-T105') {
+        // Restore base state after reset
+        if (currentTicketId.startsWith('FD-')) {
+          initializeV2TicketState(currentTicketId);
+        } else if (currentTicketId === 'ARE-T105') {
           setSubtasks([anomalySubtask]);
           setActiveSubtask('anomaly-detected');
         }
@@ -867,15 +893,8 @@ export default function App() {
       : undefined;
     const firstId = selectedAreticket?.id || fdTicket.areTickets[0]?.id || '';
 
-    // Initialise a per-ticket activity map for every ARE ticket in this FD group
-    const newMap: Record<string, ActivityEvent[]> = {};
-    fdTicket.areTickets.forEach(ticket => {
-      newMap[ticket.id] = [makeCreatedEvent(ticket.id)];
-    });
-    setV2ActivitiesMap(newMap);
-
-    // Seed the shared activityEvents with the first (selected) ticket's events
-    setActivityEvents(newMap[firstId] ?? []);
+    // Optimistically initialize default V2 detail state; backend saved state (if present) will replace it.
+    initializeV2TicketState(fdId, firstId);
 
     setCurrentFDId(fdId);
     setCurrentTicketId(fdId);
