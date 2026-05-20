@@ -318,7 +318,7 @@ export function TicketView2ListingPage({ onFDTicketClick, onNavigate }: TicketVi
                   const isCollapsed = collapsedGroups.has(group.fdId);
                   const statusCounts = getGroupStatusCounts(group.areTickets);
                   return (
-                    <div key={group.fdId} className="mb-[18px] rounded-[14px] border border-[#DCE5F2] overflow-visible bg-[#F4F7FD] shadow-none">
+                    <div key={group.fdId} className="mb-[18px] rounded-[14px] border border-[#DCE5F2] overflow-hidden bg-[#F4F7FD] shadow-none">
                       {/* FD Group Header */}
                       <div
                         className="h-[52px] flex items-center gap-2 px-[22px] border-b border-[#E2E8F0] bg-[#F4F7FD] hover:bg-[#EBF0FB] cursor-pointer select-none transition-colors"
