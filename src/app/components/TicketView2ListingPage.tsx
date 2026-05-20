@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ExternalLink, ChevronDown, ChevronUp, Filter, Inbox, Search } from 'lucide-react';
+import { ExternalLink, ChevronDown, ChevronRight, Filter, Inbox, Search } from 'lucide-react';
 import { LeftSidebar } from './LeftSidebar';
 import svgPaths from '@/imports/Frame1410084320/svg-gty1oqsfxl';
 
@@ -52,7 +52,7 @@ const FD_GROUPS: FDGroup[] = [
     areTickets: [
       {
         areId: 'ARE-T101',
-        title: 'Anomaly Detected',
+        title: 'Rate Anomaly: Moments',
         status: 'Open',
         severity: 'High',
         fdTicket: '270cG4c5',
@@ -61,7 +61,7 @@ const FD_GROUPS: FDGroup[] = [
         events: 20,
         successRate: 70.00,
         created: '10/13/2025 10:53PM',
-        latestActivity: 'RCA completed'
+        latestActivity: 'Completed RCA identification'
       }
     ]
   },
@@ -81,7 +81,7 @@ const FD_GROUPS: FDGroup[] = [
         events: 34,
         successRate: 48.00,
         created: '10/11/2025 9:20AM',
-        latestActivity: 'Escalated to backend team'
+        latestActivity: 'Completed RCA identification'
       },
       {
         areId: 'ARE-T097',
@@ -94,7 +94,7 @@ const FD_GROUPS: FDGroup[] = [
         events: 12,
         successRate: 55.00,
         created: '10/11/2025 11:00AM',
-        latestActivity: 'Root cause updated'
+        latestActivity: 'Completed RCA identification'
       }
     ]
   },
@@ -114,7 +114,7 @@ const FD_GROUPS: FDGroup[] = [
         events: 9,
         successRate: 82.00,
         created: '10/08/2025 3:45PM',
-        latestActivity: 'Tenant mapping validated'
+        latestActivity: 'Completed RCA identification'
       }
     ]
   },
@@ -134,7 +134,7 @@ const FD_GROUPS: FDGroup[] = [
         events: 17,
         successRate: 61.00,
         created: '10/05/2025 7:10PM',
-        latestActivity: 'Workflow restarted'
+        latestActivity: 'Completed RCA identification'
       },
       {
         areId: 'ARE-T087',
@@ -147,7 +147,7 @@ const FD_GROUPS: FDGroup[] = [
         events: 15,
         successRate: 91.00,
         created: '09/30/2025 1:22PM',
-        latestActivity: 'Retry triggered'
+        latestActivity: 'Completed RCA identification'
       },
       {
         areId: 'ARE-T084',
@@ -160,7 +160,7 @@ const FD_GROUPS: FDGroup[] = [
         events: 28,
         successRate: 39.00,
         created: '09/27/2025 11:05AM',
-        latestActivity: 'Validation completed'
+        latestActivity: 'Completed RCA identification'
       }
     ]
   }
@@ -323,41 +323,45 @@ export function TicketView2ListingPage({ onFDTicketClick, onNavigate }: TicketVi
                     <div key={group.fdId} className="mb-[18px] rounded-[14px] border border-[#DCE5F2] overflow-hidden bg-[#F4F7FD] shadow-none">
                       {/* FD Group Header */}
                       <div
-                        className="h-[52px] flex items-center gap-3 px-[22px] border-b border-[#E2E8F0] bg-[#EDF3FF] hover:bg-[#E8F0FF] cursor-pointer select-none transition-colors"
+                        className="h-[52px] flex items-center gap-2 px-[22px] border-b border-[#E2E8F0] bg-[#F4F7FD] hover:bg-[#EBF0FB] cursor-pointer select-none transition-colors"
                         onClick={() => toggleGroup(group.fdId)}
                       >
-                        {/* Left: icon + label + FD ID + badge */}
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                          {isCollapsed
-                            ? <ChevronDown className="w-4 h-4 text-gray-600 flex-shrink-0" />
-                            : <ChevronUp className="w-4 h-4 text-gray-600 flex-shrink-0" />
-                          }
-                          <span className="text-[15px] font-bold text-[#2B3445]">
-                            PT-{group.fdDisplayId}
-                          </span>
-                          <span className="inline-flex items-center h-6 px-2.5 rounded-full text-xs font-semibold flex-shrink-0 bg-[#DCEBFF] text-[#326BFF]">
-                            {formatCountLabel(group.areTickets.length, 'ARE ticket', 'ARE tickets')}
-                          </span>
-                          <span className={`inline-flex items-center h-6 px-2.5 rounded-full text-xs font-medium flex-shrink-0 ${STATUS_ROW_STYLE[statusLabel] ?? 'bg-gray-100 text-gray-600 border border-gray-200'}`}>
-                            {statusLabel}
-                          </span>
-                        </div>
+                        {/* Caret — right when collapsed, down when expanded */}
+                        {isCollapsed
+                          ? <ChevronRight className="w-4 h-4 text-[#4B6094] flex-shrink-0" />
+                          : <ChevronDown className="w-4 h-4 text-[#4B6094] flex-shrink-0" />
+                        }
 
-                        {/* Right: status summary + external link + toggle */}
-                        <div className="flex items-center gap-4 flex-shrink-0">
+                        {/* FD Ticket ID */}
+                        <span className="text-[14px] font-bold text-[#1E293B] flex-shrink-0">
+                          PT-{group.fdDisplayId}
+                        </span>
+
+                        {/* Redirect icon */}
+                        <button
+                          onClick={e => { e.stopPropagation(); onFDTicketClick(group.fdId); }}
+                          className="p-0.5 rounded hover:bg-white/70 transition-colors flex-shrink-0"
+                          title="Open FD ticket detail"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5 text-[#64748B] hover:text-blue-600" />
+                        </button>
+
+                        {/* Vertical divider */}
+                        <div className="w-px h-4 bg-[#CBD5E1] mx-1 flex-shrink-0" />
+
+                        {/* ARE ticket count badge */}
+                        <span className="inline-flex items-center h-6 px-2.5 rounded-full text-xs font-semibold flex-shrink-0 bg-[#DCEBFF] text-[#326BFF]">
+                          {formatCountLabel(group.areTickets.length, 'ARE ticket', 'ARE tickets')}
+                        </span>
+
+                        {/* Status dots — pushed to the right */}
+                        <div className="flex items-center gap-4 ml-auto">
                           {statusOrder.filter(status => statusCounts[status]).map(status => (
                             <div key={status} className="flex items-center gap-1.5">
                               <div className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[status] || 'bg-gray-400'}`} />
                               <span className="text-[13px] text-[#667085] font-medium">{statusCounts[status]} {status}</span>
                             </div>
                           ))}
-                          <button
-                            onClick={e => { e.stopPropagation(); onFDTicketClick(group.fdId); }}
-                            className="p-1 rounded hover:bg-white/60 transition-colors"
-                            title="Open FD ticket detail"
-                          >
-                            <ExternalLink className="w-3.5 h-3.5 text-gray-500 hover:text-blue-600" />
-                          </button>
                         </div>
                       </div>
 

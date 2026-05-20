@@ -38,6 +38,7 @@ export default function App() {
   const [currentTicketId, setCurrentTicketId] = useState<string>('');
   const [appView, setAppView] = useState<'v1' | 'v2'>('v1');
   const [currentFDId, setCurrentFDId] = useState<string>('');
+  const [v2ActivitiesMap, setV2ActivitiesMap] = useState<Record<string, ActivityEvent[]>>({});
   const [subtasks, setSubtasks] = useState<Subtask[]>([]);
   const [activeSubtask, setActiveSubtask] = useState<string>('');
   const [isActivityOpen, setIsActivityOpen] = useState(true);
@@ -72,6 +73,25 @@ export default function App() {
     'ARE-T104': 'Eligibility Verification work not started',
     'ARE-T105': 'Rate Anomaly Detected - Physician/Facility Notification'
   };
+
+  // Creation timestamps for each V2 ARE ticket (keyed by subtask ID)
+  const V2_TICKET_CREATION_MAP: Record<string, string> = {
+    'anomaly-detected':     '10/13/2025 10:53PM',
+    'pause-resume-worker':  '10/11/2025 9:20AM',
+    'terminate-workflow':   '10/11/2025 11:00AM',
+    'credential-management':'10/08/2025 3:45PM',
+    'disable-trigger':      '10/05/2025 7:10PM',
+    'pause-fb-work':        '09/30/2025 1:22PM',
+    'state-management':     '09/27/2025 11:05AM',
+  };
+
+  const makeCreatedEvent = (subtaskId: string): ActivityEvent => ({
+    id: 1,
+    timestamp: V2_TICKET_CREATION_MAP[subtaskId] ?? '10/13/2025 10:53PM',
+    action: 'created ticket',
+    user: 'System',
+    type: 'system',
+  });
 
   // V2 FD ticket data
   interface V2FDTicketDef {
@@ -575,8 +595,15 @@ export default function App() {
     }
   };
 
-  // Close expanded activity when switching subtasks
+  // Close expanded activity when switching subtasks; in V2 mode swap per-ticket activity logs
   const handleSubtaskClick = (subtaskId: string) => {
+    if (appView === 'v2' && activeSubtask && subtaskId !== activeSubtask) {
+      // Persist whatever is currently in activityEvents back to the map for the outgoing ticket
+      setV2ActivitiesMap(prev => ({ ...prev, [activeSubtask]: activityEvents }));
+      // Load the incoming ticket's saved activities (or its creation event if first visit)
+      const saved = v2ActivitiesMap[subtaskId];
+      setActivityEvents(saved ?? [makeCreatedEvent(subtaskId)]);
+    }
     setActiveSubtask(subtaskId);
     setExpandedActivity(null);
   };
@@ -631,7 +658,8 @@ export default function App() {
   const isDatadogValidationSubtask = baseType === 'datadog-validation';
 
   // Check if current subtask is pause/resume app workers
-  const isPauseResumeWorkerSubtask = baseType === 'pause-fb-work';
+  // 'pause-resume-worker' is the ID used for ARE-T098 in V2; 'pause-fb-work' covers V1 and ARE-T087
+  const isPauseResumeWorkerSubtask = baseType === 'pause-fb-work' || baseType === 'pause-resume-worker';
 
   // Check if current subtask is credential management
   const isCredentialManagementSubtask = baseType === 'credential-management';
@@ -645,8 +673,8 @@ export default function App() {
   // Check if alert bucket is selected
   const isAlertBucket = activeSubtask === 'alert-bucket';
 
-  // Check if current subtask should show dropbox (NOT text notes and NOT datadog-validation and NOT pause-fb-work and NOT credential-management and NOT state-management and NOT alert-bucket and NOT anomaly-detected)
-  const isDropboxSubtask = activeSubtask && !['failure-notes', 'datadog-validation', 'rca-identification', 'issue-fixed-note', 'pause-fb-work', 'credential-management', 'state-management'].includes(baseType) && !isAlertBucket && !isAnomalyDetectedSubtask;
+  // Check if current subtask should show dropbox (NOT text notes, datadog, pause/resume, credential, state, alert-bucket, anomaly)
+  const isDropboxSubtask = activeSubtask && !['failure-notes', 'datadog-validation', 'rca-identification', 'issue-fixed-note', 'pause-fb-work', 'pause-resume-worker', 'credential-management', 'state-management'].includes(baseType) && !isAlertBucket && !isAnomalyDetectedSubtask;
 
   // Show empty state if no subtasks
   const showEmptyState = subtasks.length === 0;
@@ -837,12 +865,24 @@ export default function App() {
     const selectedAreticket = areId
       ? fdTicket.areTickets.find(ticket => ticket.displayId === areId)
       : undefined;
+    const firstId = selectedAreticket?.id || fdTicket.areTickets[0]?.id || '';
+
+    // Initialise a per-ticket activity map for every ARE ticket in this FD group
+    const newMap: Record<string, ActivityEvent[]> = {};
+    fdTicket.areTickets.forEach(ticket => {
+      newMap[ticket.id] = [makeCreatedEvent(ticket.id)];
+    });
+    setV2ActivitiesMap(newMap);
+
+    // Seed the shared activityEvents with the first (selected) ticket's events
+    setActivityEvents(newMap[firstId] ?? []);
+
     setCurrentFDId(fdId);
     setCurrentTicketId(fdId);
     setCurrentView('detail');
     setActivePanel(null);
     setSubtasks(fdTicket.areTickets);
-    setActiveSubtask(selectedAreticket?.id || fdTicket.areTickets[0]?.id || '');
+    setActiveSubtask(firstId);
     setCurrentTicketContext(fdId);
   };
 
