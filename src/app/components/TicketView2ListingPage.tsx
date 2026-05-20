@@ -317,8 +317,6 @@ export function TicketView2ListingPage({ onFDTicketClick, onNavigate }: TicketVi
                 filteredGroups.map(group => {
                   const isCollapsed = collapsedGroups.has(group.fdId);
                   const statusCounts = getGroupStatusCounts(group.areTickets);
-                  const statusLabel = group.fdStatus;
-
                   return (
                     <div key={group.fdId} className="mb-[18px] rounded-[14px] border border-[#DCE5F2] overflow-hidden bg-[#F4F7FD] shadow-none">
                       {/* FD Group Header */}
@@ -349,12 +347,12 @@ export function TicketView2ListingPage({ onFDTicketClick, onNavigate }: TicketVi
                         </button>
 
                         {/* ARE ticket count badge */}
-                        <span className="inline-flex items-center h-6 px-3 rounded-full text-[13px] font-medium flex-shrink-0 bg-[#D9E4F3] text-[#35557A]">
+                        <span className="inline-flex items-center justify-center h-6 w-[122px] rounded-full text-[13px] font-medium flex-shrink-0 bg-[#D9E4F3] text-[#35557A]">
                           {formatCountLabel(group.areTickets.length, 'ARE ticket', 'ARE tickets')}
                         </span>
 
-                        {/* Status dots — pushed to the right */}
-                        <div className="flex items-center gap-4 ml-auto">
+                        {/* Status summary right next to ticket count */}
+                        <div className="flex items-center gap-3 flex-wrap">
                           {statusOrder.filter(status => statusCounts[status]).map(status => (
                             <div key={status} className="flex items-center gap-1.5">
                               <div className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[status] || 'bg-gray-400'}`} />
