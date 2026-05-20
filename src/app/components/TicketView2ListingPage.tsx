@@ -322,7 +322,7 @@ export function TicketView2ListingPage({ onFDTicketClick, onNavigate }: TicketVi
                       {/* FD Group Header */}
                       <div className="rounded-[14px] overflow-hidden bg-[#F4F7FD]">
                       <div
-                        className="h-[52px] flex items-center gap-2 px-[22px] border-b border-[#E2E8F0] bg-[#F4F7FD] hover:bg-[#EBF0FB] cursor-pointer select-none transition-colors"
+                        className="h-[52px] rounded-t-[14px] flex items-center gap-2 px-[22px] border-b border-[#E2E8F0] bg-[#F4F7FD] hover:bg-[#EBF0FB] cursor-pointer select-none transition-colors"
                         onClick={() => toggleGroup(group.fdId)}
                       >
                         {/* Filled caret — right when collapsed, down when expanded */}
@@ -367,7 +367,7 @@ export function TicketView2ListingPage({ onFDTicketClick, onNavigate }: TicketVi
                       {!isCollapsed && group.areTickets.map(ticket => (
                         <div
                           key={ticket.areId}
-                          className="grid gap-3 px-[22px] h-[74px] border-b border-[#EEF2F6] bg-white cursor-pointer transition-colors hover:bg-[#F8FAFF] group overflow-visible"
+                          className={`grid gap-3 px-[22px] h-[74px] border-b border-[#EEF2F6] bg-white cursor-pointer transition-colors hover:bg-[#F8FAFF] group overflow-visible ${ticket.areId === group.areTickets[group.areTickets.length - 1]?.areId ? 'rounded-b-[14px] border-b-0' : ''}`}
                           style={{ gridTemplateColumns: '160px 320px 140px 120px 120px 180px 100px 120px 160px 240px' }}
                           onClick={() => onFDTicketClick(group.fdId, ticket.areId)}
                           onMouseEnter={() => setHoveredRow(ticket.areId)}

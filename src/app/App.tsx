@@ -893,11 +893,10 @@ export default function App() {
       : undefined;
     const firstId = selectedAreticket?.id || fdTicket.areTickets[0]?.id || '';
 
-    // Optimistically initialize default V2 detail state; backend saved state (if present) will replace it.
-    initializeV2TicketState(fdId, firstId);
-
     setCurrentFDId(fdId);
     setCurrentTicketId(fdId);
+    // keep clicked ARE highlighted while detail state loads/restores
+    setActiveSubtask(firstId);
     setCurrentView('detail');
     setActivePanel(null);
     setSubtasks(fdTicket.areTickets);
