@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ExternalLink, ChevronDown, ChevronRight, Filter, Inbox, Search } from 'lucide-react';
+import { ExternalLink, Filter, Inbox, Search } from 'lucide-react';
 import { LeftSidebar } from './LeftSidebar';
 import svgPaths from '@/imports/Frame1410084320/svg-gty1oqsfxl';
 
@@ -317,8 +317,6 @@ export function TicketView2ListingPage({ onFDTicketClick, onNavigate }: TicketVi
                 filteredGroups.map(group => {
                   const isCollapsed = collapsedGroups.has(group.fdId);
                   const statusCounts = getGroupStatusCounts(group.areTickets);
-                  const statusLabel = group.fdStatus;
-
                   return (
                     <div key={group.fdId} className="mb-[18px] rounded-[14px] border border-[#DCE5F2] overflow-hidden bg-[#F4F7FD] shadow-none">
                       {/* FD Group Header */}
@@ -326,11 +324,13 @@ export function TicketView2ListingPage({ onFDTicketClick, onNavigate }: TicketVi
                         className="h-[52px] flex items-center gap-2 px-[22px] border-b border-[#E2E8F0] bg-[#F4F7FD] hover:bg-[#EBF0FB] cursor-pointer select-none transition-colors"
                         onClick={() => toggleGroup(group.fdId)}
                       >
-                        {/* Caret — right when collapsed, down when expanded */}
-                        {isCollapsed
-                          ? <ChevronRight className="w-4 h-4 text-[#4B6094] flex-shrink-0" />
-                          : <ChevronDown className="w-4 h-4 text-[#4B6094] flex-shrink-0" />
-                        }
+                        {/* Filled caret — right when collapsed, down when expanded */}
+                        <span
+                          className={`inline-block flex-shrink-0 transition-transform duration-150 ${isCollapsed ? '' : 'rotate-90'}`}
+                          aria-hidden="true"
+                        >
+                          <span className="block w-0 h-0 border-y-[5px] border-y-transparent border-l-[7px] border-l-[#3553B7]" />
+                        </span>
 
                         {/* FD Ticket ID */}
                         <span className="text-[14px] font-bold text-[#1E293B] flex-shrink-0">
@@ -346,16 +346,13 @@ export function TicketView2ListingPage({ onFDTicketClick, onNavigate }: TicketVi
                           <ExternalLink className="w-3.5 h-3.5 text-[#64748B] hover:text-blue-600" />
                         </button>
 
-                        {/* Vertical divider */}
-                        <div className="w-px h-4 bg-[#CBD5E1] mx-1 flex-shrink-0" />
-
                         {/* ARE ticket count badge */}
-                        <span className="inline-flex items-center h-6 px-2.5 rounded-full text-xs font-semibold flex-shrink-0 bg-[#DCEBFF] text-[#326BFF]">
+                        <span className="inline-flex items-center justify-center h-6 w-[122px] rounded-full text-[13px] font-medium flex-shrink-0 bg-[#D9E4F3] text-[#35557A]">
                           {formatCountLabel(group.areTickets.length, 'ARE ticket', 'ARE tickets')}
                         </span>
 
-                        {/* Status dots — pushed to the right */}
-                        <div className="flex items-center gap-4 ml-auto">
+                        {/* Status summary right next to ticket count */}
+                        <div className="flex items-center gap-3 flex-wrap">
                           {statusOrder.filter(status => statusCounts[status]).map(status => (
                             <div key={status} className="flex items-center gap-1.5">
                               <div className={`w-1.5 h-1.5 rounded-full ${STATUS_DOT[status] || 'bg-gray-400'}`} />
