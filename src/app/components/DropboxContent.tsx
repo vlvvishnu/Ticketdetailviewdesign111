@@ -173,6 +173,7 @@ const defaultWorkflowInstances: WorkflowInstance[] = [
 
 export function DropboxContent({ subtaskTitle, subtaskId, onEnableTrigger, onDisableTrigger, onMarkCompleted, isCompleted, onTerminate, onReTrigger, pendingInstances, onPendingInstancesConsumed }: DropboxContentProps) {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [openedFromBanner, setOpenedFromBanner] = useState(false);
   const [selectedWorkflow, setSelectedWorkflow] = useState<string>('');
   const [selectedTenant, setSelectedTenant] = useState<string>('');
   const { addActivity } = useActivity();
@@ -393,12 +394,12 @@ export function DropboxContent({ subtaskTitle, subtaskId, onEnableTrigger, onDis
                 { label: 'Workflow', value: 'Eligibility Verification' },
                 { label: 'Variant', value: 'Homehealth' }
               ]}
-              onClick={() => !isCompleted && setIsPopupOpen(true)}
+              onClick={() => !isCompleted && (setOpenedFromBanner(true), setIsPopupOpen(true))}
             />
 
             {/* Dropbox Button */}
             <button
-              onClick={() => !isCompleted && setIsPopupOpen(true)}
+              onClick={() => !isCompleted && (setOpenedFromBanner(false), setIsPopupOpen(true))}
               disabled={isCompleted}
               className={`w-full h-[132px] border-dashed rounded-[3px] transition-all flex items-center justify-center ${
                 isCompleted
@@ -427,31 +428,31 @@ export function DropboxContent({ subtaskTitle, subtaskId, onEnableTrigger, onDis
       {baseSubtaskId === 'disable-trigger' ? (
         <TriggerConfigModal
           isOpen={isPopupOpen && !isCompleted}
-          onClose={() => setIsPopupOpen(false)}
+          onClose={() => { setIsPopupOpen(false); setOpenedFromBanner(false); }}
           onAddWorkflows={handleAddWorkflows}
-          prefilledTenant="Brightstar Care"
-          prefilledWorkflow="Eligibility Verification"
-          prefilledVariant="Homehealth"
+          prefilledTenant={openedFromBanner ? 'Brightstar Care' : undefined}
+          prefilledWorkflow={openedFromBanner ? 'Eligibility Verification' : undefined}
+          prefilledVariant={openedFromBanner ? 'Homehealth' : undefined}
         />
       ) : baseSubtaskId === 'terminate-workflow' ? (
         /* Use TerminateWorkflowModal for terminate-workflow subtask */
         <TerminateWorkflowModal
           isOpen={isPopupOpen && !isCompleted}
-          onClose={() => setIsPopupOpen(false)}
+          onClose={() => { setIsPopupOpen(false); setOpenedFromBanner(false); }}
           onAddToTicket={handleAddWorkflowInstances}
-          prefilledTenant="Brightstar Care"
-          prefilledWorkflow="Eligibility Verification"
-          prefilledVariant="Homehealth"
+          prefilledTenant={openedFromBanner ? 'Brightstar Care' : undefined}
+          prefilledWorkflow={openedFromBanner ? 'Eligibility Verification' : undefined}
+          prefilledVariant={openedFromBanner ? 'Homehealth' : undefined}
         />
       ) : baseSubtaskId === 'trigger-workflow' ? (
         /* Use TriggerWorkflowModal for trigger-workflow subtask */
         <TriggerWorkflowModal
           isOpen={isPopupOpen && !isCompleted}
-          onClose={() => setIsPopupOpen(false)}
+          onClose={() => { setIsPopupOpen(false); setOpenedFromBanner(false); }}
           onAddToTicket={handleTriggeredWorkflows}
-          prefilledTenant="Brightstar Care"
-          prefilledWorkflow="Eligibility Verification"
-          prefilledVariant="Homehealth"
+          prefilledTenant={openedFromBanner ? 'Brightstar Care' : undefined}
+          prefilledWorkflow={openedFromBanner ? 'Eligibility Verification' : undefined}
+          prefilledVariant={openedFromBanner ? 'Homehealth' : undefined}
         />
       ) : (
         /* Center Popup Modal for other subtasks */
